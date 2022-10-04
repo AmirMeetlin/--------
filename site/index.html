@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script defer src="https://unpkg.com/vue@next"></script>
+    <script defer src="script.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body id="app">
+    <section class="section-form container" v-if="showSection == 'auth'">
+        <form autocomplete="off" @submit.prevent="auth">
+            <h1>Вход</h1>
+            <input type="text" placeholder="юзернейм" ref="authlogin" autocomplete="off" required minlength="4"
+                maxlength="32">
+            <input type="password" placeholder="пароль" ref="authpassword" autocomplete="new-password" required
+                minlength="4" maxlength="32">
+            <button type="submit">войти</button>
+            <span @click="showSection = 'reg'">зарегистрироваться</span>
+        </form>
+    </section>
+    <section class="section-form container" v-if="showSection == 'reg'">
+        <form @submit.prevent="reg">
+            <h1>Регистрация</h1>
+            <input type="text" placeholder="юзернейм" ref="reglogin" autocomplete="off" minlength="6" maxlength="32"
+                required>
+            <input type="text" placeholder="имя" ref="regname" autocomplete="off" minlength="2" maxlength="32" required>
+            <input type="text" placeholder="фамилия" ref="regsurname" autocomplete="off" minlength="6" maxlength="32"
+                required>
+            <input type="password" placeholder="пароль" ref="regpassword" autocomplete="new-password" minlength="6"
+                maxlength="32" required>
+            <input type="password" placeholder="пароль" ref="regpasswordrep" autocomplete="new-password" minlength="6"
+                maxlength="32" required>
+            <button type="submit">зарегистрироваться</button>
+            <span @click="showSection = 'auth'">войти</span>
+        </form>
+    </section>
+    <section class="section-chat container" v-if="showSection == 'chat'">
+        <ul class="leftside">
+            <a class="exit" @click="exit()">выйти</a>
+            <p>
+                {{self.Name}}
+                {{self.Surname}} |
+                {{self.Username}}
+            </p>
+            <input type="text" placeholder="search" ref="seachfield" @input="searchUsers()">
+            <h1>{{search.length == 0 ? "Чаты" : "Люди"}}</h1>
+            <li v-if="search.length == 0" v-for="(item,index) in chats" :key="index" @click="selectChat(item)">
+                <p :class="item.HasOnline  ? 'online' : ''">{{item.Name}} {{item.Surname}} <span>{{item.Time}}</span>
+                </p>
+                <p>{{item.Text}}</p>
+            </li>
+            <li v-if="search.length > 0" v-for="(item,index) in search" :key="index" @click="selectChat(item)">
+                <p :class="item.HasOnline  ? 'online' : ''">{{item.Name}} {{item.Surname}} <span>{{item.Time}}</span>
+                </p>
+            </li>
+        </ul>
+        <div class="rightside" v-if="currentChat.user?.ID">
+            <div class="header">
+                <h1>{{currentChat.user.Name}} {{currentChat.user.Surname}} <span class="online"
+                        v-if="currentChat.user.HasOnline"></span></h1>
+            </div>
+            <ul class="body">
+                <li v-for="(item, index) in currentChat.messages"
+                    :class="item.IDUserSender == self.ID ? 'outgoing' : 'incoming'">
+                    {{item.Text}}
+                </li>
+            </ul>
+            <div class="footer">
+                <form @submit.prevent="sendMessage()" v-on:keyup.shift="toggleEnter = false"
+                    v-on:keydown.shift="toggleEnter = true">
+                    <button type="submit">
+                        отправить
+                    </button>
+                    <textarea v-on:keyup.enter="sendMessage()" v-on:keyup.shift="toggleEnter = false" ref="messagefield" placeholder="сообщение" maxlength="8000" minlength="1"></textarea>
+                </form>
+            </div>
+        </div>
+        <div class="rightside-disabled" v-else>
+            чат не выбран
+        </div>
+    </section>
+</body>
+
+</html>
